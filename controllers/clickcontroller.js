@@ -7,11 +7,26 @@ import Compaign from "../models/compaignModel.js";
 import { v4 as uuidv4 } from 'uuid';
 
 export const trackClick = async (req, res) => {
-  const { campaign_id, pub_id,originalClick } = req.query;
+  let { campaign_id, pub_id,originalClick } = req.query;
 
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
   const userAgent = req.headers['user-agent'];
   const referrer = req.headers['referer'];
+
+
+  if (campaign_id !== undefined) {
+  campaign_id = Number(campaign_id);
+  if (isNaN(campaign_id)) {
+    return res.status(400).json({ success: false, message: "Invalid compId" });
+  }
+}
+
+  if (pub_id !== undefined) {
+       pub_id = Number(pub_id);
+  if (isNaN(pub_id)) {
+    return res.status(400).json({ success: false, message: "Invalid pub_id" });
+  }
+}
 
   try {
     const existing = await Click.findOne({ campaignId: campaign_id, pubId: pub_id, ip });
