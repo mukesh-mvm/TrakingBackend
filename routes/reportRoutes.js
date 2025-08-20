@@ -1,6 +1,7 @@
 import express from 'express';
-import { getCampaignReport } from '../controllers/campaignReportController.js';
+import { getCampaignReport ,getCampaignByPubIdReport} from '../controllers/campaignReportController.js';
 
 const router = express.Router();
 router.get('/campaigns', getCampaignReport);
+router.get('/publicerReport', getCampaignByPubIdReport);
 export default router;

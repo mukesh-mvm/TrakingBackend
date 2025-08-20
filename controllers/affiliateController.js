@@ -56,6 +56,8 @@ export const loginAffiliate = async (req, res) => {
         id: affiliate._id,
         name: affiliate.firstname + " " + affiliate.lastName,
         email: affiliate.email,
+        pubId: affiliate.pubId,
+        postBackUrl: affiliate.postBackUrl,
       },
       token: generateToken(affiliate._id),
     });
