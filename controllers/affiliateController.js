@@ -124,3 +124,43 @@ export const deleteAffiliate = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// uupdate postback url
+export const updatePostBackUrl = async (req, res) => {
+  try {
+    const { id } = req.params; // affiliate id from URL
+    const { postBackUrl } = req.body;
+
+    if (!postBackUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "postBackUrl is required",
+      });
+    }
+
+    const updatedAffiliate = await Affiliate.findByIdAndUpdate(
+      id,
+      { postBackUrl },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedAffiliate) {
+      return res.status(404).json({
+        success: false,
+        message: "Affiliate not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "PostBack URL updated successfully",
+      data: updatedAffiliate,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
