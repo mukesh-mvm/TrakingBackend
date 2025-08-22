@@ -6,8 +6,10 @@ import {
   getAffiliateById,
   updateAffiliate,
   deleteAffiliate,
-  updatePostBackUrl
+  updatePostBackUrl,
+
 } from '../controllers/affiliateController.js';
+
 
 const router = express.Router();
 
@@ -17,6 +19,6 @@ router.get('/getAllAffiliate', getAllAffiliates);
 router.get('/getOneAffiliate/:id', getAffiliateById);
 router.put('/updateAffiliate/:id', updateAffiliate);
 router.delete('/deleteAffiliate/:id', deleteAffiliate);
-router.patch("/updatePostbackUrl/:id", updatePostBackUrl);
+
 
 export default router;

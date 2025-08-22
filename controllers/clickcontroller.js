@@ -72,12 +72,40 @@ export const trackClick = async (req, res) => {
     });
 
     // Redirect
+
+
+    /*
     const redirectUri = new URL(campaign.trakingUrl);
     // redirectUri.searchParams.set('click_id', click._id);
     // redirectUri.searchParams.set('campaign_id', campaign_id);
     // redirectUri.searchParams.set('pub_id', pub_id);
 
     res.redirect(`${redirectUri.toString()}?cid=${click.clickId}&campaignId=${campaign_id}&pubId=${pub_id}`);
+
+
+    console.log((`${redirectUri.toString()}?cid=${click.clickId}&campaignId=${campaign_id}&pubId=${pub_id}`))
+
+    */
+
+
+const redirectUri = new URL(campaign.trakingUrl);
+
+// Build your extra params
+const extraParams = `cid=${click.clickId}&campaignId=${campaign_id}&pubId=${pub_id}`;
+
+// Check if ? already exists in the base URL
+let finalUrl;
+if (redirectUri.search) {
+  // URL already has ?
+  finalUrl = `${redirectUri.toString()}&${extraParams}`;
+} else {
+  // No query yet
+  finalUrl = `${redirectUri.toString()}?${extraParams}`;
+}
+
+// Redirect to final URL
+res.redirect(finalUrl);
+
 
 
   } catch (error) {

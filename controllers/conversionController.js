@@ -14,6 +14,12 @@ export const handlePostback = async (req, res) => {
       return res.status(404).json({ message: 'Click not found' });
     }
 
+    const presentClick = await Conversion.findOne({clickId:click_id});
+
+    if(presentClick){
+       return res.status(404).json({ message: 'Conversion already present' });
+    }
+
     // 2. Save conversion
     await Conversion.create({
       clickId: click_id,

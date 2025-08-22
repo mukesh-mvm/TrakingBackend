@@ -64,6 +64,7 @@ export const createCompaign = async (req, res) => {
     const {offerName,status,devices,startDate,endDate,type,trakingUrl, payout,
     saleAmount = 0,advertiser} = req.body
 
+
     const newCompaign = new Compaign({
       offerName,status,devices,startDate,endDate,type,trakingUrl,payout,advertiser,saleAmount,
       clicks: 0,
@@ -130,6 +131,7 @@ export const updateCompaign = async (req, res) => {
     compaign.trakingUrl = req.body.trakingUrl ?? compaign.trakingUrl;
     compaign.payout = req.body.payout ?? compaign.payout;
     compaign.advertiser = req.body.advertiser ?? compaign.advertiser;
+    compaign.compId =  compaign.compId
 
     // Stats fields
     compaign.clicks = req.body.clicks ?? compaign.clicks;
