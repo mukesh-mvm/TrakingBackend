@@ -42,6 +42,8 @@ const allowedOrigins = new Set([
 ]);
 
 // CORS middleware setup
+
+/*
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -56,6 +58,15 @@ app.use(
       }
     },
     credentials: true, // Allows cookies and session headers
+  })
+);
+
+*/
+
+app.use(
+  cors({
+    origin: "*", // Allow all domains
+    credentials: true, // If you don’t need cookies/auth headers, remove this
   })
 );
 
