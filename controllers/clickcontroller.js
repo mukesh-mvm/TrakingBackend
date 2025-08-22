@@ -88,7 +88,11 @@ export const trackClick = async (req, res) => {
     */
 
 
-const redirectUri = new URL(campaign.trakingUrl);
+
+
+const redirectUri1 = campaign?.trakingUrl?.replace('{click_id}', click.clickId)  
+
+const redirectUri = new URL(redirectUri1);
 
 // Build your extra params
 const extraParams = `cid=${click.clickId}&campaignId=${campaign_id}&pubId=${pub_id}`;

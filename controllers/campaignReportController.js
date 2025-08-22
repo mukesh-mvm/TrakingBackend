@@ -224,12 +224,19 @@ export const getCampaignReport = async (req, res) => {
 
 export const getCampaignByPubIdReport = async (req, res) => {
   try {
-    const { startDate, endDate } = req.query;
+    const { startDate, endDate, pubId } = req.query;
 
     if (!startDate || !endDate) {
       return res.status(400).json({
         success: false,
-        message: 'Start and end date are required'
+        message: "Start and end date are required",
+      });
+    }
+
+    if (!pubId) {
+      return res.status(400).json({
+        success: false,
+        message: "pubId is required",
       });
     }
 
@@ -237,52 +244,54 @@ export const getCampaignByPubIdReport = async (req, res) => {
     const end = new Date(endDate);
     end.setHours(23, 59, 59, 999);
 
-    // Step 1: Aggregate clicks grouped by campaignId
+    // Step 1: Aggregate clicks grouped by campaignId (filter by pubId + date)
     const clickData = await Click.aggregate([
       {
         $match: {
-          timestamp: { $gte: start, $lte: end }
-        }
+          pubId: pubId.toString(),
+          timestamp: { $gte: start, $lte: end },
+        },
       },
       {
         $group: {
           _id: "$campaignId",
           totalClicks: { $sum: 1 },
-          clickIds: { $push: "$clickId" }   // collect clickIds for conversions
-        }
-      }
+          clickIds: { $push: "$clickId" },
+        },
+      },
     ]);
 
     if (clickData.length === 0) {
       return res.json({ success: true, report: [] });
     }
 
-    // Step 2: Aggregate conversions for those clickIds
-    const allClickIds = clickData.flatMap(cd => cd.clickIds);
+    // Step 2: Aggregate conversions (filter by pubId + date + matching clickIds)
+    const allClickIds = clickData.flatMap((cd) => cd.clickIds);
     const conversionData = await Conversion.aggregate([
       {
         $match: {
+          pubId: pubId.toString(),
           clickId: { $in: allClickIds },
-          timestamp: { $gte: start, $lte: end }
-        }
+          timestamp: { $gte: start, $lte: end },
+        },
       },
       {
         $group: {
           _id: "$campaignId",
           totalConversions: { $sum: 1 },
-          totalSaleAmount: { $sum: { $toDouble: "$amount" } } // ensure string -> number
-        }
-      }
+          totalSaleAmount: { $sum: { $toDouble: "$amount" } },
+        },
+      },
     ]);
 
     // Step 3: Fetch campaign details
-    const campaignIds = clickData.map(c => Number(c._id));
+    const campaignIds = clickData.map((c) => Number(c._id));
     const campaigns = await Campaign.find({ compId: { $in: campaignIds } });
 
     // Step 4: Build report
-    const report = campaigns.map(campaign => {
-      const clickInfo = clickData.find(cd => Number(cd._id) === campaign.compId);
-      const conversionInfo = conversionData.find(conv => Number(conv._id) === campaign.compId);
+    const report = campaigns.map((campaign) => {
+      const clickInfo = clickData.find((cd) => Number(cd._id) === campaign.compId);
+      const conversionInfo = conversionData.find((conv) => Number(conv._id) === campaign.compId);
 
       const clicks = clickInfo ? clickInfo.totalClicks : 0;
       const conversions = conversionInfo ? conversionInfo.totalConversions : 0;
@@ -294,6 +303,7 @@ export const getCampaignByPubIdReport = async (req, res) => {
 
       return {
         Campaign: campaign.offerName,
+        pubId: Number(pubId),
         Clicks: clicks,
         Payout: payout,
         "Payout in INR": payout * conversions,
@@ -315,10 +325,12 @@ export const getCampaignByPubIdReport = async (req, res) => {
     const totalPayout = report.reduce((sum, r) => sum + r["Payout in INR"], 0);
     const totalSaleAmount = report.reduce((sum, r) => sum + r["Sale Amount"], 0);
     const totalPendingPayout = report.reduce((sum, r) => sum + r["Pending Payout"], 0);
-    const totalCR = totalClicks > 0 ? ((totalConversions / totalClicks) * 100).toFixed(2) : 0;
+    const totalCR =
+      totalClicks > 0 ? ((totalConversions / totalClicks) * 100).toFixed(2) : 0;
 
     report.push({
       Campaign: "Total",
+      pubId: Number(pubId),
       Clicks: totalClicks,
       Payout: "",
       "Payout in INR": totalPayout,
@@ -334,7 +346,6 @@ export const getCampaignByPubIdReport = async (req, res) => {
     });
 
     res.json({ success: true, report });
-
   } catch (err) {
     console.error("Error generating report:", err);
     res.status(500).json({ success: false, message: "Server error" });

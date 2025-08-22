@@ -7,7 +7,6 @@ import {
   updateAffiliate,
   deleteAffiliate,
   updatePostBackUrl,
-
 } from '../controllers/affiliateController.js';
 
 
